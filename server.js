@@ -4,24 +4,41 @@ const path = require('path');
 const PORT = 3000;
 
 const server = http.createServer((req, res) => {
-    let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
-    let extName = path.extname(filePath);
+    if(req.method === 'POST' && req.url === '/tasks'){
+        let body = '';
 
-    //------------------------ SET CONTENT TYPE ----------------------------------
-    let contentType = 'text/html';
-    if (extName === '.js') contentType = 'text/javascript';
-    else if (extName === '.css') contentType = 'text/.css';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
 
-    //------------------------ READ and SERVE FILE ----------------------------------
-    fs.readFile(filePath, (err, content) => {
-        if (err){
-            res.writeHead(404);
-            res.end("404 not found.");
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType});
-            res.end(content);
-        }
-    });
+        req.on('end', () => {
+            const task = JSON.parse(body);
+            const tasksFile = path.join(__dirname, 'data', 'tasks.json');
+
+            fs.readFile(tasksFile, 'utf-8', (err, data) => {
+                let tasks = [];
+                if(!err && data) {
+                    tasks = JSON.parse(data);
+                }
+
+                tasks.push(task);
+
+                fs.writeFile(tasksFile, JSON.stringify(tasks, null, 2), err => {
+                    if (err){
+                        res.writeHead(500);
+                        return res.end('Failed to save task')
+                    }
+
+                    res.writeHead(200, {'Content-Type': 'application/json'});
+                    res.end(JSON.stringify({message: 'Task saved'}));
+                });
+            });
+        });
+        return;
+    }
+
+    //----------------- STATIC file serving (HTML, CSS, JS) -----------------
+    let filePath = path.join(__dirname, 'public', req.url === '/')
 });
 
 server.listen(PORT, () => {

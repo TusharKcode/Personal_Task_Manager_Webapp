@@ -4,7 +4,7 @@ const taskList = document.getElementById('taskList');
 
 //------------------------ ADD TASK TO LIST ----------------------------------
 taskForm.addEventListener('submit', function(e){
-    e.preventDefault;
+    e.preventDefault();
 
     const taskText = taskInput.value.trim();
     if (taskText === '') return;
