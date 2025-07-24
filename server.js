@@ -38,7 +38,22 @@ const server = http.createServer((req, res) => {
     }
 
     //----------------- STATIC file serving (HTML, CSS, JS) -----------------
-    let filePath = path.join(__dirname, 'public', req.url === '/')
+    let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
+    let extName = path.extname(filePath);
+
+    let contentType = 'text/html';
+    if(extName === '.js') contentType = 'text/javascript';
+    else if(extName === '.css') contentType = 'text/css';
+
+    fs.readFile(filePath, (err, content) => {
+        if (err){
+            res.writeHead(404);
+            res.end("404 not found");
+        } else{
+            res.writeHead(200, { 'Content-Type' : contentType});
+            res.end(content);
+        }
+    });
 });
 
 server.listen(PORT, () => {

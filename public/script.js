@@ -1,3 +1,6 @@
+const { error } = require("console");
+const { console } = require("inspector");
+
 const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
@@ -21,4 +24,20 @@ taskForm.addEventListener('submit', function(e){
    taskList.appendChild(li);
 
    taskInput.value = '';
+
+   //------------------ SEND TO SERVER ------------------
+   fetch('/tasks', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({text: taskText})
+   })
+   .then(response => response.json())
+   .then(data => {
+    console.log('Server: ', data.message);
+   })
+   .catch(error => {
+    console.error('Error: ', error);
+   });
 });
