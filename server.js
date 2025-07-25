@@ -39,6 +39,31 @@ const server = http.createServer((req, res) => {
             });
         });
     }
+    
+    else if (req.url.startsWith('/tasks/') && req.method === 'DELETE') {
+        const taskId = decodeURIComponent(req.url.split('/')[2]);
+
+        fs.readFile('./data/tasks.json', 'utf8', (err, data) => {
+            if (err) {
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to read tasks' }));
+                return;
+            }
+            let tasks = JSON.parse(data);
+            tasks = tasks.filter(task => task.text !== taskId);
+
+            fs.writeFile('./data/tasks.json', JSON.stringify(tasks), err => {
+                if (err) {
+                    res.writeHead(500);
+                    res.end(JSON.stringify({ error: 'Failed to delete task' }));
+                } else {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ message: 'Task deleted' }));
+                }
+            });
+        });
+    }
+
     //----------------- STATIC file serving (HTML, CSS, JS) -----------------
     else {
         let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);

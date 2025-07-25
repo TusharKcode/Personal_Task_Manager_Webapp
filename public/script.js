@@ -1,6 +1,3 @@
-const { error } = require("console");
-const { console } = require("inspector");
-
 const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
@@ -25,6 +22,15 @@ taskForm.addEventListener('submit', function(e){
 
    taskInput.value = '';
 
+   deleteBtn.onclick = () => {
+    fetch(`/tasks/${encodeURIComponent(taskText)}`, {
+        method: 'DELETE'
+    }).then(() => {
+        li.remove();
+    }).catch(err => console.error('Failed to delete:', err));
+};
+
+
    //------------------ SEND TO SERVER ------------------
    fetch('/tasks', {
     method: 'POST',
@@ -40,8 +46,9 @@ taskForm.addEventListener('submit', function(e){
    .catch(error => {
     console.error('Error: ', error);
    });
+});
 
-   //------------------------ LOAD TASKS ON PAGE LOAD ------------------
+//------------------------ LOAD TASKS ON PAGE LOAD ------------------
 window.addEventListener('DOMContentLoaded', () => {
     fetch('/tasks')
         .then(res => res.json())
@@ -59,6 +66,4 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         })
         .catch(err => console.error('Failed to load tasks:', err));
-});
-
 });
